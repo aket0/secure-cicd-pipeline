@@ -1,0 +1,4 @@
+[bandit]
+exclude = tests,.venv
+# No skips configured. Every finding must be reviewed.
+# See docs/false-positives.md for documented exceptions.

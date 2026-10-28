@@ -1,0 +1,71 @@
+name: Security Scan (scheduled)
+
+# Weekly scan — catches new CVEs in existing dependencies
+on:
+  schedule:
+    - cron: "0 6 * * 1"  # Mondays at 06:00 UTC
+  workflow_dispatch:     # allow manual trigger
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  full-audit:
+    name: Full Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install all tools
+        run: pip install -e ".[dev]" bandit[sarif] pip-audit
+
+      - name: SAST — bandit
+        run: bandit -r src/ -f sarif -o bandit-results.sarif || true
+
+      - name: Upload SAST SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: bandit-results.sarif
+          category: bandit-weekly
+
+      - name: Dependency audit — pip-audit
+        run: pip-audit --output pip-audit-weekly.json --format json
+
+      - name: Upload dependency audit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pip-audit-weekly
+          path: pip-audit-weekly.json
+          retention-days: 90
+
+      - name: Secret scan — gitleaks (full history)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"
+
+      - name: Upload Trivy SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-weekly

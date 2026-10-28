@@ -1,0 +1,74 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "policy-validator"
+version = "1.0.0"
+description = "Security misconfiguration detector for JSON/YAML config files"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = []
+
+[project.optional-dependencies]
+yaml = ["pyyaml>=6.0"]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+    "bandit>=1.8",
+    "pip-audit>=2.7",
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+policy-validator = "policy_validator.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# ── Ruff (linting + formatting) ──────────────────────────────────────────────
+[tool.ruff]
+src = ["src"]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "S",    # flake8-bandit (security)
+    "UP",   # pyupgrade
+    "ANN",  # annotations
+    "RUF",  # ruff-specific
+]
+ignore = [
+    "S101",    # assert is fine in tests
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["ANN", "S"]  # relaxed in tests
+
+# ── Bandit (SAST) ─────────────────────────────────────────────────────────────
+[tool.bandit]
+exclude_dirs = ["tests", ".venv"]
+skips = []  # no skips — review every finding
+
+# ── pytest ────────────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+pythonpath = ["src"]
+
+# ── Coverage ──────────────────────────────────────────────────────────────────
+[tool.coverage.run]
+source = ["policy_validator"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true

@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Tool caches
+.ruff_cache/
+.mypy_cache/
+.hypothesis/
+
+# Test / coverage
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+coverage.xml
+*.sarif
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Security tool outputs (reports kept out of repo)
+bandit-report.json
+pip-audit-report.json
+trivy-report.json
+gitleaks-report.json
+semgrep-report.json
+
+# Secrets — never commit these
+*.env
+.env*
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
