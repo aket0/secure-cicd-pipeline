@@ -1,0 +1,9 @@
+title = "Gitleaks Configuration — secure-cicd-pipeline"
+
+# The examples/ directory contains intentional security test fixtures used by
+# the policy validator's integration tests. These are not real credentials.
+[allowlist]
+description = "Intentional test fixtures in examples directory"
+paths = [
+  '''^examples/''',
+]
